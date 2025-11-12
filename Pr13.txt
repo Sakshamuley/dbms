@@ -1,0 +1,89 @@
+use LibraryDB;
+db.createCollection("Books");
+
+db.Books.insertMany([
+  {
+    TITLE: "mongodb guide",
+    DESCRIPTION: "Introduction to MongoDB",
+    BY: "john",
+    URL: "http://mongodb.com/guide",
+    TAGS: ["database", "nosql"],
+    LIKES: 120
+  },
+  {
+    TITLE: "mongodb advanced",
+    DESCRIPTION: "Advanced MongoDB operations",
+    BY: "john",
+    URL: "http://mongodb.com/advanced",
+    TAGS: ["database", "aggregation"],
+    LIKES: 80
+  },
+  {
+    TITLE: "nosql overview",
+    DESCRIPTION: "Overview of NoSQL systems",
+    BY: "alice",
+    URL: "http://nosql.org",
+    TAGS: ["database", "overview"],
+    LIKES: 60
+  },
+  {
+    TITLE: "nodejs tutorial",
+    DESCRIPTION: "Learn Node.js programming",
+    BY: "john",
+    URL: "http://nodejs.org/tutorial",
+    TAGS: ["javascript", "backend"],
+    LIKES: 40
+  },
+  {
+    TITLE: "python for data",
+    DESCRIPTION: "Data analytics using Python",
+    BY: "mary",
+    URL: "http://python.org/data",
+    TAGS: ["data", "python"],
+    LIKES: 150
+  }
+]);
+
+db.Books.aggregate([
+  { $match: { BY: "john" } },
+  { $count: "Number_of_Books" }
+]);
+
+db.Books.aggregate([
+  { $match: { BY: "john" } },
+  { $sort: { LIKES: 1 } },
+  { $limit: 1 },
+  { $project: { _id: 0, TITLE: 1, LIKES: 1 } }
+]);
+
+db.Books.aggregate([
+  { $match: { BY: "john" } },
+  { $sort: { LIKES: -1 } },
+  { $limit: 1 },
+  { $project: { _id: 0, TITLE: 1, LIKES: 1 } }
+]);
+
+db.Books.aggregate([
+  { $match: { BY: "john" } },
+  { $group: { _id: "$BY", Average_Likes: { $avg: "$LIKES" } } }
+]);
+
+db.Books.aggregate([
+  { $match: { BY: "john" } },
+  { $sort: { TITLE: 1 } },
+  { $limit: 1 },
+  { $project: { _id: 0, TITLE: 1 } }
+]);
+
+db.Books.aggregate([
+  { $match: { BY: "john" } },
+  { $sort: { TITLE: -1 } },
+  { $limit: 1 },
+  { $project: { _id: 0, TITLE: 1 } }
+]);
+
+db.Books.createIndex({ BY: 1 });
+
+db.Books.find({ BY: "john" }).explain("executionStats");
+
+

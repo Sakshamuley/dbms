@@ -1,0 +1,100 @@
+package pr8_14;
+import java.sql.*;
+import java.util.*;
+
+public class switchCase {
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/demo_a1", "root", "root");
+            Statement stm = con.createStatement();
+
+            while (true) {
+                System.out.println("\nMenu:");
+                System.out.println("1. Insert");
+                System.out.println("2. Update");
+                System.out.println("3. Delete");
+                System.out.println("4. Display");
+                System.out.println("5. Exit");
+                System.out.print("Enter your choice: ");
+                int choice = sc.nextInt();
+                sc.nextLine(); 
+
+                switch (choice) {
+                    case 1:  
+                        System.out.print("Enter pid: ");
+                        int pidInsert = sc.nextInt();
+                        sc.nextLine();
+
+                        System.out.print("Enter pname: ");
+                        String pnameInsert = sc.nextLine();
+
+                        System.out.print("Enter price: ");
+                        int priceInsert = sc.nextInt();
+                        sc.nextLine();
+
+                        String insertSQL = "INSERT INTO product VALUES (" + pidInsert + ", '" + pnameInsert + "', " + priceInsert + ")";
+                        System.out.println("Record inserted successfully.");
+                        int insertCount = stm.executeUpdate(insertSQL);
+                         
+                        break;
+                    case 2:  
+                        System.out.print("Enter pid to update: ");
+                        int pidUpdate = sc.nextInt();
+                        sc.nextLine();
+
+                        System.out.print("Enter new pname: ");
+                        String pnameUpdate = sc.nextLine();
+
+                        System.out.print("Enter new price: ");
+                        int priceUpdate = sc.nextInt();
+                        sc.nextLine();
+
+                        String updateSQL = "UPDATE product SET pname = '" + pnameUpdate + "', price = " + priceUpdate + " WHERE pid = " + pidUpdate;
+                        System.out.println("Record updated successfully.");
+                        int updateCount = stm.executeUpdate(updateSQL);
+
+                        break;
+                    case 3:  
+                        System.out.print("Enter pid to delete: ");
+                        int pidDelete = sc.nextInt();
+                        sc.nextLine();
+
+                        String deleteSQL = "DELETE FROM product WHERE pid = " + pidDelete;
+                        System.out.println("Record deleted successfully.");
+                        int deleteCount = stm.executeUpdate(deleteSQL);
+        
+                        break;
+                    case 4:  
+                        ResultSet rs = stm.executeQuery("SELECT * FROM product");
+                        System.out.println("Product Table:");
+                        while (rs.next()) {
+                            System.out.println("Pid: " + rs.getInt("pid"));
+                            System.out.println("Pname: " + rs.getString("pname"));
+                            System.out.println("Price: " + rs.getInt("price"));
+                            
+                        }
+                        rs.close();
+
+                        break;
+                    case 5:  
+                        System.out.println("Exiting...");
+                        stm.close();
+                        con.close();
+                        sc.close();
+                        System.exit(0);
+
+                        break;
+                    default:
+                        System.out.println("Invalid choice! Please enter 1-5.");
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+        }
+    }
+}

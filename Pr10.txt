@@ -1,0 +1,39 @@
+-- Create main table
+CREATE TABLE Books (
+  AccNo NUMBER PRIMARY KEY,
+  Title VARCHAR2(100),
+  Author VARCHAR2(50),
+  Publisher VARCHAR2(50),
+  Count NUMBER(5)
+);
+
+-- Create audit table
+CREATE TABLE Library_Audit (
+  AccNo NUMBER,
+  Title VARCHAR2(100),
+  Author VARCHAR2(50),
+  Publisher VARCHAR2(50),
+  Count NUMBER(5),
+  Action VARCHAR2(20),
+  Action_Date DATE
+);
+
+-- BEFORE DELETE trigger
+CREATE OR REPLACE TRIGGER trg_before_delete_books
+BEFORE DELETE ON Books
+FOR EACH ROW
+BEGIN
+  INSERT INTO Library_Audit VALUES 
+  (:OLD.AccNo, :OLD.Title, :OLD.Author, :OLD.Publisher, :OLD.Count, 'DELETED', SYSDATE);
+END;
+/
+
+-- AFTER UPDATE trigger
+CREATE OR REPLACE TRIGGER trg_after_update_books
+AFTER UPDATE ON Books
+FOR EACH ROW
+BEGIN
+  INSERT INTO Library_Audit VALUES 
+  (:NEW.AccNo, :NEW.Title, :NEW.Author, :NEW.Publisher, :NEW.Count, 'UPDATED', SYSDATE);
+END;
+/

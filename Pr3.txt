@@ -1,0 +1,62 @@
+CREATE DATABASE CustomerDB;
+USE CustomerDB;
+
+CREATE TABLE Customer (
+  CustomerID INT PRIMARY KEY,
+  Name VARCHAR(100) NOT NULL,
+  Address VARCHAR(150),
+  Phone VARCHAR(15) UNIQUE NOT NULL,
+  Email VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE Account (
+  AccountID INT PRIMARY KEY,
+  CustomerID INT NOT NULL,
+  AccountType VARCHAR(20) CHECK (AccountType IN ('Saving', 'Current', 'Fixed')),
+  Balance DECIMAL(12,2) CHECK (Balance >= 0),
+  CreatedDate DATE DEFAULT (CURRENT_DATE),
+  FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+);
+
+CREATE TABLE Transaction (
+  TransactionID INT PRIMARY KEY,
+  AccountID INT NOT NULL,
+  TransactionType VARCHAR(10) CHECK (TransactionType IN ('Credit', 'Debit')),
+  Amount DECIMAL(10,2) CHECK (Amount >= 0),
+  TransactionDate DATE DEFAULT (CURRENT_DATE),
+  FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+);
+
+SHOW TABLES;
+DESC Customer;
+DESC Account;
+DESC Transaction;
+
+INSERT INTO Customer VALUES 
+(1, 'Ravi Sharma', 'Pune', '9876543210', 'ravi@gmail.com'),
+(2, 'Asha Patel', 'Mumbai', '9123456780', 'asha@gmail.com');
+
+INSERT INTO Account VALUES 
+(101, 1, 'Saving', 25000.00, DEFAULT),
+(102, 2, 'Current', 50000.00, DEFAULT);
+
+INSERT INTO Transaction VALUES 
+(1001, 101, 'Credit', 5000.00, DEFAULT),
+(1002, 101, 'Debit', 2000.00, DEFAULT),
+(1003, 102, 'Credit', 10000.00, DEFAULT);
+
+CREATE VIEW CustomerAccountView AS
+SELECT 
+  c.Name AS CustomerName,
+  a.AccountID,
+  a.Balance
+FROM 
+  Customer c
+  JOIN Account a ON c.CustomerID = a.CustomerID;
+
+SELECT * FROM CustomerAccountView;
+
+CREATE INDEX idx_TransactionDate ON Transaction(TransactionDate);
+
+SHOW INDEX FROM Transaction;
+

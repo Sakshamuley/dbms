@@ -1,0 +1,92 @@
+use ShopDB;
+db.createCollection("Order");
+
+db.Order.insertMany([
+  { cus_id: "A1", amount: 400, status: "P" },
+  { cus_id: "B1", amount: 300, status: "D" },
+  { cus_id: "A1", amount: 200, status: "F" },
+  { cus_id: "C1", amount: 200, status: "F" },
+  { cus_id: "B1", amount: 700, status: "P" },
+  { cus_id: "B1", amount: 800, status: "P" }
+]);
+
+var mapFunction = function() {
+  if (this.status === "P") {
+    emit(this.cus_id, this.amount);
+  }
+};
+
+var reduceFunction = function(key, values) {
+  return Array.sum(values);
+};
+
+db.Order.mapReduce(
+  mapFunction,
+  reduceFunction,
+  { out: "SumByCustomer_Pending" }
+);
+
+db.SumByCustomer_Pending.find();
+
+var mapFunction = function() {
+  emit(this.cus_id, { total: this.amount, count: 1 });
+};
+
+var reduceFunction = function(key, values) {
+  var result = { total: 0, count: 0 };
+  values.forEach(function(v) {
+    result.total += v.total;
+    result.count += v.count;
+  });
+  return result;
+};
+
+var finalizeFunction = function(key, reducedValue) {
+  reducedValue.avg = reducedValue.total / reducedValue.count;
+  return reducedValue;
+};
+
+db.Order.mapReduce(
+  mapFunction,
+  reduceFunction,
+  {
+    out: "AverageByCustomer",
+    finalize: finalizeFunction
+  }
+);
+
+db.AverageByCustomer.find();
+
+var mapFunction = function() {
+  emit(this.cus_id, this.amount);
+};
+
+var reduceFunction = function(key, values) {
+  return Math.min.apply(Math, values);
+};
+
+db.Order.mapReduce(
+  mapFunction,
+  reduceFunction,
+  { out: "MinAmountByCustomer" }
+);
+
+db.MinAmountByCustomer.find();
+
+var mapFunction = function() {
+  if (this.status === "F") {
+    emit(this.cus_id, this.amount);
+  }
+};
+
+var reduceFunction = function(key, values) {
+  return Math.max.apply(Math, values);
+};
+
+db.Order.mapReduce(
+  mapFunction,
+  reduceFunction,
+  { out: "MaxFailedAmountByCustomer" }
+);
+
+db.MaxFailedAmountByCustomer.find();
